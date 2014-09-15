@@ -6,7 +6,7 @@
 
 
     this.size = { x: screen.canvas.width, y: screen.canvas.height };
-    this.bodies = new Player(this);
+    this.bodies = [new Player(this)];
 
     var self = this;
     var tick = function(){
@@ -22,16 +22,20 @@
   Game.prototype = {
 
     update: function(){
-      if (this.bodies.update !== undefined) {
-          this.bodies.update(screen);
+      for (var i = 0; i < this.bodies.length; i++) {
+        if (this.bodies[i].update !== undefined) {
+          this.bodies[i].update();
         }
+      }
     },
 
     draw: function(screen){
       screen.clearRect(0, 0, this.size.x, this.size.y);
-      if (this.bodies.draw !== undefined) {
-          this.bodies.draw(screen);
+      for (var i = 0; i < this.bodies.length; i++) {
+        if (this.bodies[i].draw !== undefined) {
+          this.bodies[i].draw(screen);
         }
+      }
     }
   };
 
