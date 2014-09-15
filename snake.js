@@ -7,6 +7,10 @@
     this.size = { x: screen.canvas.width, y: screen.canvas.height };
     this.bodies = createBlocks(this).concat(new Player(this));
 
+
+
+    
+
     var self = this;
     var tick = function(){
       self.update();
@@ -22,6 +26,8 @@
 
     update: function(){
 
+
+      createFood(this);
       reportCollisions(this.bodies);
       for (var i = 0; i < this.bodies.length; i++) {
         if (this.bodies[i].update !== undefined) {
@@ -53,43 +59,45 @@
 
   };
 
-
   var Food = function(game, center) {
-  this.game = game;
-  this.size = { x: 12, y: 12 };
-  this.center = center;
-
+    this.game = game;
+    this.center = center;
+    this.size = { x: 12, y: 12 };
   };
 
   Food.prototype = {
-
 
     draw: function(screen) {
       drawRect(screen, this);
     },
 
     collision: function() {
-
       this.game.removeBody(this);
-
     }
-
   };
 
+  var createFood = function(game) {
 
-  var createFoods = function(game) {
-    var foods = [];
-    for (var i = 20; i < game.size.x - 20; i++) {
-      for(var j = 20; j < game.size.y - 20; j++){
-        if (Math.random() > 0.995){
-          foods.push(new Food(game, { x: x, y: y}));
-        }
-      }
-    }
+    if(Math.random() > .995){
 
-    return foods;
+      var xf = (30 + Math.random() * (game.size.x - 60));
+      var yf = (30 + Math.random() * (game.size.y - 60));
+
+      for (i = 0; i < game.bodies.length; i++){
+        if (
+        game.bodies[i].center.x + game.bodies[i].size.x / 2 <= xf - 6 ||
+        game.bodies[i].center.y + game.bodies[i].size.y / 2 <= yf - 6 ||
+        game.bodies[i].center.x - game.bodies[i].size.x / 2 >= xf - 6 ||
+        game.bodies[i].center.y - game.bodies[i].size.y / 2 >= yf - 6
+        ){
+
+          game.addBody(new Food(game, { x: xf, y: yf}));
+          break;
+        };
+      };
+    };
   };
-
+  
 
 
   var Block = function(game, center) {
@@ -107,6 +115,10 @@
 
     collision: function() {
 
+      for(i=0; i<this.game.bodies.length; i++){
+        this.game.bodies[i] = "";
+      };
+
       alert("GAME OVER");
 
     }
@@ -117,7 +129,7 @@
     var blocks = [];
     for (var i = 1; i < game.size.x; i++) {
       if (i % 15 === 0){
-      var x = i;                           //sizes and positions hard coded - would like to make this flexible
+      var x = i;                          
       var y = 15;
       blocks.push(new Block(game, { x: x, y: y}));
       var y = game.size.y - 15;
@@ -142,8 +154,9 @@
   this.game = game;
   this.size = { x: 12, y: 12 };
   this.center = { x: this.game.size.x / 2, y: this.game.size.y / 2 };
-  this.direction = "";
+  this.direction = "right";
   this.keyboarder = new Keyboarder();
+  this.follower = game.addBody(new Tail(game, this));
 
   };
 
@@ -164,13 +177,13 @@
       }
 
       if (this.direction === "left") {
-          this.center.x -= 2;
+          this.center.x -= 4;
       } else if (this.direction === "right") {
-          this.center.x += 2;
+          this.center.x += 4;
       } else if (this.direction === "up") {
-          this.center.y -= 2;
+          this.center.y -= 4;
       } else if (this.direction === "down") {
-          this.center.y += 2;
+          this.center.y += 4;
       }
 
 
@@ -180,6 +193,55 @@
       drawRect(screen, this);
     }
   };
+
+  var Tail = function(game,body) {
+  this.game = game;
+  this.follows = body;
+  this.size = { x: 12, y: 12 };
+  this.direction = body.direction;
+
+  if (body.direction === "right"){
+    this.center = { x: body.center.x - 15 , y: body.center.y };
+  } else if (body.direction === "left"){
+    this.center = { x: body.center.x + 15 , y: body.center.y };
+  } else if (body.direction === "up"){
+    this.center = { x: body.center.x + 15 , y: body.center.y };
+  } else if (body.direction === "down"){
+    this.center = { x: body.center.x - 15 , y: body.center.y };
+  }
+
+
+
+  };
+
+  Tail.prototype = {
+    update: function() {
+
+
+      if (this.center.x == this.follows.center.x || this.center.y == this.follows.center.y){
+
+        this.direction = this.follows.direction;
+
+      };
+
+      if (this.direction === "left") {
+          this.center.x -= 4;
+      } else if (this.direction === "right") {
+          this.center.x += 4;
+      } else if (this.direction === "up") {
+          this.center.y -= 4;
+      } else if (this.direction === "down") {
+          this.center.y += 4;
+      };
+
+
+    },
+
+    draw: function(screen) {
+      drawRect(screen, this);
+    }
+  };
+
 
 
   var Keyboarder = function() {
