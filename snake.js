@@ -40,6 +40,10 @@
       }
     },
 
+    addBody: function(body) {
+      this.bodies.push(body);
+    },
+
     removeBody: function(body) {
       var bodyIndex = this.bodies.indexOf(body);
       if (bodyIndex !== -1) {
@@ -49,6 +53,45 @@
 
   };
 
+
+  var Food = function(game, center) {
+  this.game = game;
+  this.size = { x: 12, y: 12 };
+  this.center = center;
+
+  };
+
+  Food.prototype = {
+
+
+    draw: function(screen) {
+      drawRect(screen, this);
+    },
+
+    collision: function() {
+
+      this.game.removeBody(this);
+
+    }
+
+  };
+
+
+  var createFoods = function(game) {
+    var foods = [];
+    for (var i = 20; i < game.size.x - 20; i++) {
+      for(var j = 20; j < game.size.y - 20; j++){
+        if (Math.random() > 0.995){
+          foods.push(new Food(game, { x: x, y: y}));
+        }
+      }
+    }
+
+    return foods;
+  };
+
+
+
   var Block = function(game, center) {
   this.game = game;
   this.size = { x: 12, y: 12 };
@@ -57,18 +100,15 @@
   };
 
   Block.prototype = {
-    update: function(screen) {
-
-      return true;
-
-    },
 
     draw: function(screen) {
       drawRect(screen, this);
     },
 
     collision: function() {
-      this.game.removeBody(this);
+
+      alert("GAME OVER");
+
     }
 
   };
@@ -85,7 +125,7 @@
       }
     }
 
-    for (var i = 1; i < game.size.y; i++) {
+    for (var i = 16; i < game.size.y-16; i++) {
       if (i % 15 === 0){
       var x = 15;                           //sizes and positions hard coded - would like to make this flexible
       var y = i;
