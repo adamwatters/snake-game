@@ -4,14 +4,14 @@
 
     var screen = document.getElementById("screen").getContext("2d");
 
-    var body = {x: 10, y: 10}
 
     this.size = { x: screen.canvas.width, y: screen.canvas.height };
+    this.bodies = new Player(this);
 
     var self = this;
     var tick = function(){
-      self.update(body);
-      self.draw(screen,body);
+      self.update();
+      self.draw(screen);
       requestAnimationFrame(tick);
     };
 
@@ -21,24 +21,44 @@
 
   Game.prototype = {
 
-    update: function(body){
-      body.x +=1;
-      console.log("update");
+    update: function(){
+      if (this.bodies.update !== undefined) {
+          this.bodies.update(screen);
+        }
     },
 
-    draw: function(screen, body){
+    draw: function(screen){
       screen.clearRect(0, 0, this.size.x, this.size.y);
-      drawRect(screen, body)
+      if (this.bodies.draw !== undefined) {
+          this.bodies.draw(screen);
+        }
     }
+  };
+
+  var Player = function(game) {
+  this.game = game;
+  this.size = { x: 15, y: 15 };
+  this.center = { x: this.game.size.x / 2, y: this.game.size.y / 2 };
+}
+
+  Player.prototype = {
+    update: function() {
+        this.center.x += .5;
+        return true;
+      },
+
+    draw: function(screen) {
+        drawRect(screen, this);
+        return true;
+     }
   };
 
 
   var drawRect = function(screen, body) {
-    screen.fillStyle = '#'+Math.floor(Math.random()*16777215).toString(16);
-    screen.fillRect(body.x - 10,
-                    body.y - 10,
-                    20,
-                    20)
+    screen.fillRect(body.center.x - body.size.x / 2,
+                    body.center.y - body.size.y / 2,
+                    body.size.x,
+                    body.size.y);
   };
 
   window.addEventListener('load', function() {
