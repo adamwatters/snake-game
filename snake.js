@@ -73,6 +73,7 @@
   this.game = game;
   this.size = { x: 15, y: 15 };
   this.center = { x: this.game.size.x / 2, y: this.game.size.y / 2 };
+  this.direction = {l: false, r: false, u: false, d: false};
   this.keyboarder = new Keyboarder();
 
   };
@@ -80,14 +81,38 @@
   Player.prototype = {
     update: function(screen) {
       if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT)) {
-          this.center.x -= 5;
+          this.direction.l = true;
+          this.direction.r = false;
+          this.direction.u = false;
+          this.direction.d = false;
       } else if (this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT)) {
-          this.center.x += 5;
+          this.direction.l = false;
+          this.direction.r = true;
+          this.direction.u = false;
+          this.direction.d = false;
       } else if (this.keyboarder.isDown(this.keyboarder.KEYS.UP)) {
-          this.center.y -= 5;
+          this.direction.l = false;
+          this.direction.r = false;
+          this.direction.u = true;
+          this.direction.d = false;
       } else if (this.keyboarder.isDown(this.keyboarder.KEYS.DOWN)) {
-          this.center.y += 5;
+          this.direction.l = false;
+          this.direction.r = false;
+          this.direction.u = false;
+          this.direction.d = true;
       }
+
+      if (this.direction.l === true) {
+          this.center.x -= 2;
+      } else if (this.direction.r === true) {
+          this.center.x += 2;
+      } else if (this.direction.u === true) {
+          this.center.y -= 2;
+      } else if (this.direction.d === true) {
+          this.center.y += 2;
+      }
+
+
     },
 
     draw: function(screen) {
