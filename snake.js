@@ -21,6 +21,8 @@
   Game.prototype = {
 
     update: function(){
+
+      reportCollisions(this.bodies);
       for (var i = 0; i < this.bodies.length; i++) {
         if (this.bodies[i].update !== undefined) {
           this.bodies[i].update();
@@ -36,12 +38,20 @@
           this.bodies[i].draw(screen);
         }
       }
+    },
+
+    removeBody: function(body) {
+      var bodyIndex = this.bodies.indexOf(body);
+      if (bodyIndex !== -1) {
+        this.bodies.splice(bodyIndex, 1);
+      }
     }
+
   };
 
   var Block = function(game, center) {
   this.game = game;
-  this.size = { x: 13, y: 13 };
+  this.size = { x: 12, y: 12 };
   this.center = center;
 
   };
@@ -55,15 +65,34 @@
 
     draw: function(screen) {
       drawRect(screen, this);
+    },
+
+    collision: function() {
+      this.game.removeBody(this);
     }
+
   };
 
   var createBlocks = function(game) {
     var blocks = [];
-    for (var i = 0; i < 24; i++) {
-      var x = 35 + (i % 8) * 30;
-      var y = 35 + (i % 3) * 30;
+    for (var i = 1; i < game.size.x; i++) {
+      if (i % 15 === 0){
+      var x = i;                           //sizes and positions hard coded - would like to make this flexible
+      var y = 15;
       blocks.push(new Block(game, { x: x, y: y}));
+      var y = game.size.y - 15;
+      blocks.push(new Block(game, { x: x, y: y}));
+      }
+    }
+
+    for (var i = 1; i < game.size.y; i++) {
+      if (i % 15 === 0){
+      var x = 15;                           //sizes and positions hard coded - would like to make this flexible
+      var y = i;
+      blocks.push(new Block(game, { x: x, y: y}));
+      var x = game.size.y - 15;
+      blocks.push(new Block(game, { x: x, y: y}));
+      }
     }
 
     return blocks;
@@ -71,9 +100,9 @@
 
   var Player = function(game) {
   this.game = game;
-  this.size = { x: 15, y: 15 };
+  this.size = { x: 12, y: 12 };
   this.center = { x: this.game.size.x / 2, y: this.game.size.y / 2 };
-  this.direction = {l: false, r: false, u: false, d: false};
+  this.direction = "";
   this.keyboarder = new Keyboarder();
 
   };
@@ -81,34 +110,26 @@
   Player.prototype = {
     update: function(screen) {
       if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT)) {
-          this.direction.l = true;
-          this.direction.r = false;
-          this.direction.u = false;
-          this.direction.d = false;
+          this.direction = "left";
+
       } else if (this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT)) {
-          this.direction.l = false;
-          this.direction.r = true;
-          this.direction.u = false;
-          this.direction.d = false;
+          this.direction = "right";
+
       } else if (this.keyboarder.isDown(this.keyboarder.KEYS.UP)) {
-          this.direction.l = false;
-          this.direction.r = false;
-          this.direction.u = true;
-          this.direction.d = false;
+          this.direction = "up";
+
       } else if (this.keyboarder.isDown(this.keyboarder.KEYS.DOWN)) {
-          this.direction.l = false;
-          this.direction.r = false;
-          this.direction.u = false;
-          this.direction.d = true;
+          this.direction = "down";
+
       }
 
-      if (this.direction.l === true) {
+      if (this.direction === "left") {
           this.center.x -= 2;
-      } else if (this.direction.r === true) {
+      } else if (this.direction === "right") {
           this.center.x += 2;
-      } else if (this.direction.u === true) {
+      } else if (this.direction === "up") {
           this.center.y -= 2;
-      } else if (this.direction.d === true) {
+      } else if (this.direction === "down") {
           this.center.y += 2;
       }
 
@@ -145,6 +166,37 @@
                     body.center.y - body.size.y / 2,
                     body.size.x,
                     body.size.y);
+  };
+
+  var isColliding = function(b1, b2) {
+    return !(
+      b1 === b2 ||
+        b1.center.x + b1.size.x / 2 <= b2.center.x - b2.size.x / 2 ||
+        b1.center.y + b1.size.y / 2 <= b2.center.y - b2.size.y / 2 ||
+        b1.center.x - b1.size.x / 2 >= b2.center.x + b2.size.x / 2 ||
+        b1.center.y - b1.size.y / 2 >= b2.center.y + b2.size.y / 2
+    );
+  };
+
+  var reportCollisions = function(bodies) {
+    var bodyPairs = [];
+    for (var i = 0; i < bodies.length; i++) {
+      for (var j = i + 1; j < bodies.length; j++) {
+        if (isColliding(bodies[i], bodies[j])) {
+          bodyPairs.push([bodies[i], bodies[j]]);
+        }
+      }
+    }
+
+    for (var i = 0; i < bodyPairs.length; i++) {
+      if (bodyPairs[i][0].collision !== undefined) {
+        bodyPairs[i][0].collision(bodyPairs[i][1]);
+      }
+
+      if (bodyPairs[i][1].collision !== undefined) {
+        bodyPairs[i][1].collision(bodyPairs[i][0]);
+      }
+    }
   };
 
   window.addEventListener('load', function() {
