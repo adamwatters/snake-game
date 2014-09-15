@@ -5,10 +5,10 @@
     var screen = document.getElementById("screen").getContext("2d");
 
     this.size = { x: screen.canvas.width, y: screen.canvas.height };
+    this.bodies = [];
     this.bodies = createBlocks(this).concat(new Player(this));
 
-
-
+    console.log(this.bodies);
     
 
     var self = this;
@@ -55,7 +55,10 @@
       if (bodyIndex !== -1) {
         this.bodies.splice(bodyIndex, 1);
       }
-    }
+    },
+
+
+
 
   };
 
@@ -119,8 +122,6 @@
         this.game.bodies[i] = "";
       };
 
-      alert("GAME OVER");
-
     }
 
   };
@@ -154,37 +155,84 @@
   this.game = game;
   this.size = { x: 12, y: 12 };
   this.center = { x: this.game.size.x / 2, y: this.game.size.y / 2 };
-  this.direction = "right";
+  this.direction = "";
+  this.start = true;
   this.keyboarder = new Keyboarder();
-  this.follower = game.addBody(new Tail(game, this));
 
   };
 
   Player.prototype = {
-    update: function(screen) {
-      if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT)) {
+    update: function() {
+
+
+      if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT) && (this.direction != "right")) {
+
+          if(this.start){
+          
+          this.direction = "left";
+          this.game.addBody(new Tail(this.game, this));
+          this.start = false;
+
+        } else {
+
           this.direction = "left";
 
-      } else if (this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT)) {
+        };
+
+      } else if (this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT) && (this.direction != "left")) {
+          
+          if(this.start){
+          
+          this.direction = "right";
+          this.game.addBody(new Tail(this.game, this));
+          this.start = false;
+
+        } else {
+
           this.direction = "right";
 
-      } else if (this.keyboarder.isDown(this.keyboarder.KEYS.UP)) {
+        };
+
+      } else if (this.keyboarder.isDown(this.keyboarder.KEYS.UP) && (this.direction != "down")) {
+          
+          if(this.start){
+          
+          this.direction = "up";
+          this.game.addBody(new Tail(this.game, this));
+          this.start = false;
+
+        } else {
+
           this.direction = "up";
 
-      } else if (this.keyboarder.isDown(this.keyboarder.KEYS.DOWN)) {
+        };
+
+      } else if (this.keyboarder.isDown(this.keyboarder.KEYS.DOWN) && (this.direction != "up")) {
+          
+          if(this.start){
+          
+          this.direction = "down";
+          this.game.addBody(new Tail(this.game, this));
+          this.start = false;
+
+        } else {
+
           this.direction = "down";
 
-      }
+        };
+
+      };
+
 
       if (this.direction === "left") {
-          this.center.x -= 4;
+          this.center.x -= 5;
       } else if (this.direction === "right") {
-          this.center.x += 4;
+          this.center.x += 5;
       } else if (this.direction === "up") {
-          this.center.y -= 4;
+          this.center.y -= 5;
       } else if (this.direction === "down") {
-          this.center.y += 4;
-      }
+          this.center.y += 5;
+      };
 
 
     },
@@ -205,9 +253,9 @@
   } else if (body.direction === "left"){
     this.center = { x: body.center.x + 15 , y: body.center.y };
   } else if (body.direction === "up"){
-    this.center = { x: body.center.x + 15 , y: body.center.y };
+    this.center = { x: body.center.x , y: body.center.y + 15};
   } else if (body.direction === "down"){
-    this.center = { x: body.center.x - 15 , y: body.center.y };
+    this.center = { x: body.center.x, y: body.center.y - 15 };
   }
 
 
@@ -217,21 +265,34 @@
   Tail.prototype = {
     update: function() {
 
+      if (this.direction === "up" || this.direction === "down"){
 
-      if (this.center.x == this.follows.center.x || this.center.y == this.follows.center.y){
+        if (this.center.y == this.follows.center.y ){
 
         this.direction = this.follows.direction;
 
+        };
       };
 
+      if (this.direction === "left" || this.direction === "right"){
+
+        if (this.center.x == this.follows.center.x ){
+
+        this.direction = this.follows.direction;
+
+        };
+      };
+
+
+
       if (this.direction === "left") {
-          this.center.x -= 4;
+          this.center.x -= 5;
       } else if (this.direction === "right") {
-          this.center.x += 4;
+          this.center.x += 5;
       } else if (this.direction === "up") {
-          this.center.y -= 4;
+          this.center.y -= 5;
       } else if (this.direction === "down") {
-          this.center.y += 4;
+          this.center.y += 5;
       };
 
 
@@ -241,7 +302,6 @@
       drawRect(screen, this);
     }
   };
-
 
 
   var Keyboarder = function() {
@@ -258,7 +318,7 @@
       return keyState[keyCode] === true;
     };
 
-    this.KEYS = { LEFT: 37, RIGHT: 39, UP: 38, DOWN: 40};
+    this.KEYS = { LEFT: 37, RIGHT: 39, UP: 38, DOWN: 40, SPACE: 32 };
   };
 
 
