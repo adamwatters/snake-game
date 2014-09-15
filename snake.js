@@ -5,7 +5,7 @@
     var screen = document.getElementById("screen").getContext("2d");
 
     this.size = { x: screen.canvas.width, y: screen.canvas.height };
-    this.bodies = [new Player(this)];
+    this.bodies = createBlocks(this).concat(new Player(this));
 
     var self = this;
     var tick = function(){
@@ -37,6 +37,36 @@
         }
       }
     }
+  };
+
+  var Block = function(game, center) {
+  this.game = game;
+  this.size = { x: 13, y: 13 };
+  this.center = center;
+
+  };
+
+  Block.prototype = {
+    update: function(screen) {
+
+      return true;
+
+    },
+
+    draw: function(screen) {
+      drawRect(screen, this);
+    }
+  };
+
+  var createBlocks = function(game) {
+    var blocks = [];
+    for (var i = 0; i < 24; i++) {
+      var x = 35 + (i % 8) * 30;
+      var y = 35 + (i % 3) * 30;
+      blocks.push(new Block(game, { x: x, y: y}));
+    }
+
+    return blocks;
   };
 
   var Player = function(game) {
