@@ -7,6 +7,7 @@
     this.size = { x: screen.canvas.width, y: screen.canvas.height };
     this.bodies = [];
     this.bodies = createBlocks(this).concat(new Player(this));
+    this.lastSegment = {};
 
     console.log(this.bodies);
     
@@ -76,6 +77,7 @@
 
     collision: function() {
       this.game.removeBody(this);
+      this.game.addBody(new Tail(this.game, this.game.lastSegment));
     }
   };
 
@@ -224,6 +226,20 @@
       };
 
 
+      if (this.keyboarder.isDown(this.keyboarder.KEYS.SPACE)) {
+          
+          if(this.start){
+          
+          return;
+
+        } else {
+
+          this.game.addBody(new Tail(this.game, this.game.lastSegment));
+
+        };
+      };
+
+
       if (this.direction === "left") {
           this.center.x -= 5;
       } else if (this.direction === "right") {
@@ -243,6 +259,7 @@
   };
 
   var Tail = function(game,body) {
+
   this.game = game;
   this.follows = body;
   this.size = { x: 12, y: 12 };
@@ -257,6 +274,8 @@
   } else if (body.direction === "down"){
     this.center = { x: body.center.x, y: body.center.y - 15 };
   }
+
+  this.game.lastSegment = this;
 
 
 
