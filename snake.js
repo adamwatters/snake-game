@@ -8,7 +8,7 @@
     this.bodies = [];
     this.bodies = createBlocks(this).concat(new Player(this));
     this.lastSegment = {};
-    this.speed = 3;
+    this.speed = 1;
 
     console.log(this.bodies);
     
@@ -291,19 +291,41 @@
   Tail.prototype = {
     update: function() {
 
-      if (this.direction === "up" || this.direction === "down"){
+      if (this.direction === "up"){
 
-        if (this.center.y == this.follows.center.y ){
+        if (this.center.y <= this.follows.center.y ){
 
+        this.center.y = this.follows.center.y;
         this.direction = this.follows.direction;
 
         };
       };
 
-      if (this.direction === "left" || this.direction === "right"){
+      if (this.direction === "down"){
 
-        if (this.center.x == this.follows.center.x ){
+        if (this.center.y >= this.follows.center.y ){
 
+        this.center.y = this.follows.center.y;
+        this.direction = this.follows.direction;
+
+        };
+      };
+
+      if (this.direction === "right"){
+
+        if (this.center.x >= this.follows.center.x ){
+
+        this.center.x = this.follows.center.x;
+        this.direction = this.follows.direction;
+
+        };
+      };
+
+      if (this.direction === "left"){
+
+        if (this.center.x <= this.follows.center.x ){
+
+        this.center.x = this.follows.center.x;
         this.direction = this.follows.direction;
 
         };
