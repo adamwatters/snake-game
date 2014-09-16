@@ -8,6 +8,7 @@
     this.bodies = [];
     this.bodies = createBlocks(this).concat(new Player(this));
     this.lastSegment = {};
+    this.speed = 3;
 
     console.log(this.bodies);
     
@@ -29,7 +30,9 @@
 
 
       createFood(this);
+
       reportCollisions(this.bodies);
+
       for (var i = 0; i < this.bodies.length; i++) {
         if (this.bodies[i].update !== undefined) {
           this.bodies[i].update();
@@ -122,7 +125,7 @@
 
       for(i=0; i<this.game.bodies.length; i++){
         this.game.bodies[i] = "";
-      };
+      }
 
     }
 
@@ -154,6 +157,8 @@
   };
 
   var Player = function(game) {
+
+  this.follows = "none";
   this.game = game;
   this.size = { x: 12, y: 12 };
   this.center = { x: this.game.size.x / 2, y: this.game.size.y / 2 };
@@ -241,13 +246,13 @@
 
 
       if (this.direction === "left") {
-          this.center.x -= 5;
+          this.center.x -= this.game.speed;;
       } else if (this.direction === "right") {
-          this.center.x += 5;
+          this.center.x += this.game.speed;;
       } else if (this.direction === "up") {
-          this.center.y -= 5;
+          this.center.y -= this.game.speed;;
       } else if (this.direction === "down") {
-          this.center.y += 5;
+          this.center.y += this.game.speed;;
       };
 
 
@@ -255,7 +260,9 @@
 
     draw: function(screen) {
       drawRect(screen, this);
-    }
+    },
+
+    
   };
 
   var Tail = function(game,body) {
@@ -305,13 +312,13 @@
 
 
       if (this.direction === "left") {
-          this.center.x -= 5;
+          this.center.x -= this.game.speed;
       } else if (this.direction === "right") {
-          this.center.x += 5;
+          this.center.x += this.game.speed;
       } else if (this.direction === "up") {
-          this.center.y -= 5;
+          this.center.y -= this.game.speed;
       } else if (this.direction === "down") {
-          this.center.y += 5;
+          this.center.y += this.game.speed;
       };
 
 
@@ -319,7 +326,26 @@
 
     draw: function(screen) {
       drawRect(screen, this);
+    },
+
+    collision: function(body){
+
+      if (body.follows !== undefined) {
+
+        if (body.follows !== this && this.follows !== body){
+
+          for(i=0; i<this.game.bodies.length; i++){
+
+          this.game.bodies[i] = ""
+
+          }
+
+
+        }
+
+      }
     }
+
   };
 
 
