@@ -6,9 +6,10 @@
 
     this.size = { x: screen.canvas.width, y: screen.canvas.height };
     this.bodies = [];
-    this.bodies = createBlocks(this).concat(new Player(this));
-    this.lastSegment = {};
-    this.speed = 1;
+    this.lastSegment = new Player(this);
+    this.bodies = createBlocks(this).concat(this.lastSegment);
+    this.speed = 3;
+    this.count = 0;
 
     console.log(this.bodies);
     
@@ -38,6 +39,10 @@
           this.bodies[i].update();
         }
       }
+
+      this.count ++;
+      console.log(this.count);
+
     },
 
     draw: function(screen){
@@ -86,24 +91,16 @@
 
   var createFood = function(game) {
 
-    if(Math.random() > .995){
+    if(Math.random() > .988){
 
       var xf = (30 + Math.random() * (game.size.x - 60));
       var yf = (30 + Math.random() * (game.size.y - 60));
 
-      for (i = 0; i < game.bodies.length; i++){
-        if (
-        game.bodies[i].center.x + game.bodies[i].size.x / 2 <= xf - 6 ||
-        game.bodies[i].center.y + game.bodies[i].size.y / 2 <= yf - 6 ||
-        game.bodies[i].center.x - game.bodies[i].size.x / 2 >= xf - 6 ||
-        game.bodies[i].center.y - game.bodies[i].size.y / 2 >= yf - 6
-        ){
-
           game.addBody(new Food(game, { x: xf, y: yf}));
-          break;
+
         };
-      };
-    };
+      
+    
   };
   
 
@@ -171,6 +168,8 @@
   Player.prototype = {
     update: function() {
 
+    if (this.game.count > (20 / this.game.speed)){
+
 
       if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT) && (this.direction != "right")) {
 
@@ -179,10 +178,12 @@
           this.direction = "left";
           this.game.addBody(new Tail(this.game, this));
           this.start = false;
+          
 
         } else {
 
           this.direction = "left";
+          this.game.count = 1;
 
         };
 
@@ -193,10 +194,12 @@
           this.direction = "right";
           this.game.addBody(new Tail(this.game, this));
           this.start = false;
+          
 
         } else {
 
           this.direction = "right";
+          this.game.count = 1;
 
         };
 
@@ -207,10 +210,12 @@
           this.direction = "up";
           this.game.addBody(new Tail(this.game, this));
           this.start = false;
+          
 
         } else {
 
           this.direction = "up";
+          this.game.count = 1;
 
         };
 
@@ -221,14 +226,18 @@
           this.direction = "down";
           this.game.addBody(new Tail(this.game, this));
           this.start = false;
+          
 
         } else {
 
           this.direction = "down";
+          this.game.count = 1;
 
         };
 
       };
+
+    };
 
 
       if (this.keyboarder.isDown(this.keyboarder.KEYS.SPACE)) {
@@ -242,6 +251,26 @@
           this.game.addBody(new Tail(this.game, this.game.lastSegment));
 
         };
+      };
+
+      if (this.keyboarder.isDown(this.keyboarder.KEYS.A)) {
+
+        if (this.game.speed < 8){
+          
+          this.game.speed = this.game.speed + .1;
+
+        };
+
+      };
+
+      if (this.keyboarder.isDown(this.keyboarder.KEYS.Z)) {
+
+        if (this.game.speed >= .1){
+          
+          this.game.speed = this.game.speed - .1;
+
+        };
+
       };
 
 
@@ -295,8 +324,9 @@
 
         if (this.center.y <= this.follows.center.y ){
 
-        this.center.y = this.follows.center.y;
-        this.direction = this.follows.direction;
+          this.center.y = this.follows.center.y;
+          this.direction = this.follows.direction;
+
 
         };
       };
@@ -305,8 +335,9 @@
 
         if (this.center.y >= this.follows.center.y ){
 
-        this.center.y = this.follows.center.y;
-        this.direction = this.follows.direction;
+          this.center.y = this.follows.center.y;
+          this.direction = this.follows.direction;
+
 
         };
       };
@@ -315,18 +346,21 @@
 
         if (this.center.x >= this.follows.center.x ){
 
-        this.center.x = this.follows.center.x;
-        this.direction = this.follows.direction;
+          this.center.x = this.follows.center.x;
+          this.direction = this.follows.direction;
+
 
         };
       };
+
 
       if (this.direction === "left"){
 
         if (this.center.x <= this.follows.center.x ){
 
-        this.center.x = this.follows.center.x;
-        this.direction = this.follows.direction;
+          this.center.x = this.follows.center.x;
+          this.direction = this.follows.direction;
+
 
         };
       };
@@ -385,7 +419,7 @@
       return keyState[keyCode] === true;
     };
 
-    this.KEYS = { LEFT: 37, RIGHT: 39, UP: 38, DOWN: 40, SPACE: 32 };
+    this.KEYS = { LEFT: 37, RIGHT: 39, UP: 38, DOWN: 40, SPACE: 32, A: 65, Z: 90};
   };
 
 
