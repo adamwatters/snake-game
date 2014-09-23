@@ -11,7 +11,6 @@
     this.speed = 3;
     this.count = 0;
     this.colorCount = 11;
-    this.tailCount = 1;
     this.colorPulse = .25;
 
     
@@ -47,24 +46,32 @@
       
       if (this.colorCount < 10 || this.colorCount > 310) {
 
-        // ... reverse direction of movement.
+        // ... 
         this.colorPulse = -this.colorPulse;
 
       }
 
         this.colorCount = this.colorCount + this.colorPulse;
-        console.log(this.colorPulse);
+
 
 
     },
 
+
     draw: function(screen){
 
-      var grd = screen.createRadialGradient(200,200,5+this.colorCount,200,200,50+this.colorCount);
-      grd.addColorStop(0,"#99FF33");
-      grd.addColorStop(1,"#FFFF00");
+      // var grd = screen.createRadialGradient(200,200,50,200,200,220);
+
+      var grd = screen.createRadialGradient(200,200,5+this.colorCount,200,200,80+this.colorCount);
+
+      grd.addColorStop(0,"red");
+      grd.addColorStop(1,"yellow");
+
       screen.fillStyle=grd;
       screen.fillRect(0,0,this.size.x,this.size.y);
+
+
+
       for (var i = 0; i < this.bodies.length; i++) {
         if (this.bodies[i].draw !== undefined) {
           this.bodies[i].draw(screen);
@@ -330,17 +337,21 @@
   this.size = { x: 12, y: 12 };
   this.direction = body.direction;
 
-  
+
   if (this.game.colorPulse > 0) {
 
   this.game.colorPulse = this.game.colorPulse + .1;
-    console.log(this.game.colorPulse);
 
   } else {
 
-    this.game.colorPulse = this.game.colorPulse - .1;
-    console.log(this.game.colorPulse);
+  this.game.colorPulse = this.game.colorPulse - .1;
+
   };
+
+
+
+
+
 
   if (body.direction === "right"){
     this.center = { x: body.center.x - 15 , y: body.center.y };
