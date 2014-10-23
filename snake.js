@@ -1,6 +1,5 @@
 (function() {
   var Game = function() {
-    console.log("game");
 
     var screen = document.getElementById("screen").getContext("2d");
 
@@ -9,15 +8,17 @@
     this.lastSegment = new Player(this);
     this.bodies = createBlocks(this).concat(this.lastSegment);
     this.speed = 3;
-    this.count = 0;
+    this.colorCount = 11;
+    this.colorPulse = .25;
 
-    console.log(this.bodies);
-    
+    this.active = true;
 
     var self = this;
     var tick = function(){
-      self.update();
-      self.draw(screen);
+      if (self.active === true) {
+        self.update();
+        self.draw(screen);
+      }
       requestAnimationFrame(tick);
     };
 
@@ -28,10 +29,8 @@
   Game.prototype = {
 
     update: function(){
-
-
+      console.log("game is active");
       createFood(this);
-
       reportCollisions(this.bodies);
 
       for (var i = 0; i < this.bodies.length; i++) {
@@ -39,15 +38,24 @@
           this.bodies[i].update();
         }
       }
-
-      this.count ++;
-      console.log(this.count);
-
+      
+      if (this.colorCount < 10 || this.colorCount > 310) {
+        this.colorPulse = -this.colorPulse;
+      }
+        this.colorCount = this.colorCount + this.colorPulse;
     },
 
+
     draw: function(screen){
-      screen.fillStyle="#99FF66";
+
+      var grd = screen.createRadialGradient(200,200,5+this.colorCount,200,200,80+this.colorCount);
+
+      grd.addColorStop(0,"red");
+      grd.addColorStop(1,"yellow");
+
+      screen.fillStyle=grd;
       screen.fillRect(0,0,this.size.x,this.size.y);
+
       for (var i = 0; i < this.bodies.length; i++) {
         if (this.bodies[i].draw !== undefined) {
           this.bodies[i].draw(screen);
@@ -66,9 +74,11 @@
       }
     },
 
-
-
-
+    gameOver: function(){
+      for(i=0; i<this.game.bodies.length; i++){
+        this.bodies[i] = ""
+      }
+    }
   };
 
   var Food = function(game, center) {
@@ -96,6 +106,8 @@
       var xf = (30 + Math.random() * (game.size.x - 60));
       var yf = (30 + Math.random() * (game.size.y - 60));
 
+      if(isColliding)
+
           game.addBody(new Food(game, { x: xf, y: yf}));
 
         };
@@ -122,6 +134,7 @@
 
       for(i=0; i<this.game.bodies.length; i++){
         this.game.bodies[i] = "";
+        this.game.active = false;
       }
 
     }
@@ -155,124 +168,39 @@
 
   var Player = function(game) {
 
-  this.follows = "none";
+  this.follows = null;
   this.game = game;
   this.size = { x: 12, y: 12 };
   this.center = { x: this.game.size.x / 2, y: this.game.size.y / 2 };
   this.direction = "";
-  this.start = true;
+  this.notMoving = true;
   this.keyboarder = new Keyboarder();
+
+  //count used to delay key inputs and prevent too-sharp turns
+  this.turnCount = 0;
 
   };
 
   Player.prototype = {
     update: function() {
 
-    if (this.game.count > (20 / this.game.speed)){
+      //check
+      this.turnCount += 1;
+      if (this.turnCount > (20 / this.game.speed)){
 
-
-      if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT) && (this.direction != "right")) {
-
-          if(this.start){
-          
-          this.direction = "left";
-          this.game.addBody(new Tail(this.game, this));
-          this.start = false;
-          
-
-        } else {
-
-          this.direction = "left";
-          this.game.count = 1;
-
-        };
-
-      } else if (this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT) && (this.direction != "left")) {
-          
-          if(this.start){
-          
-          this.direction = "right";
-          this.game.addBody(new Tail(this.game, this));
-          this.start = false;
-          
-
-        } else {
-
-          this.direction = "right";
-          this.game.count = 1;
-
-        };
-
-      } else if (this.keyboarder.isDown(this.keyboarder.KEYS.UP) && (this.direction != "down")) {
-          
-          if(this.start){
-          
-          this.direction = "up";
-          this.game.addBody(new Tail(this.game, this));
-          this.start = false;
-          
-
-        } else {
-
-          this.direction = "up";
-          this.game.count = 1;
-
-        };
-
-      } else if (this.keyboarder.isDown(this.keyboarder.KEYS.DOWN) && (this.direction != "up")) {
-          
-          if(this.start){
-          
-          this.direction = "down";
-          this.game.addBody(new Tail(this.game, this));
-          this.start = false;
-          
-
-        } else {
-
-          this.direction = "down";
-          this.game.count = 1;
-
-        };
-
-      };
-
-    };
-
-
-      if (this.keyboarder.isDown(this.keyboarder.KEYS.SPACE)) {
-          
-          if(this.start){
-          
-          return;
-
-        } else {
-
-          this.game.addBody(new Tail(this.game, this.game.lastSegment));
-
+        if (this.keyboarder.isDown(this.keyboarder.KEYS.LEFT) && (this.direction != "right")) {
+          this.handleKeyPress("left");
+        } 
+        else if (this.keyboarder.isDown(this.keyboarder.KEYS.RIGHT) && (this.direction != "left")) {
+          this.handleKeyPress("right");
+        } 
+        else if (this.keyboarder.isDown(this.keyboarder.KEYS.UP) && (this.direction != "down")) {
+          this.handleKeyPress("up");
+        } 
+        else if (this.keyboarder.isDown(this.keyboarder.KEYS.DOWN) && (this.direction != "up")) {
+          this.handleKeyPress("down");
         };
       };
-
-      if (this.keyboarder.isDown(this.keyboarder.KEYS.A)) {
-
-        if (this.game.speed < 8){
-          
-          this.game.speed = this.game.speed + .1;
-
-        };
-
-      };
-
-      if (this.keyboarder.isDown(this.keyboarder.KEYS.Z)) {
-
-        if (this.game.speed >= .1){
-          
-          this.game.speed = this.game.speed - .1;
-
-        };
-
-      };
-
 
       if (this.direction === "left") {
           this.center.x -= this.game.speed;;
@@ -283,23 +211,50 @@
       } else if (this.direction === "down") {
           this.center.y += this.game.speed;;
       };
-
-
     },
 
     draw: function(screen) {
       drawRect(screen, this);
     },
 
-    
+    startPlayer: function(direction) {
+      this.direction = direction;
+      this.game.addBody(new Tail(this.game, this));
+      this.notMoving = false;
+    },
+
+    handleKeyPress: function(direction) {
+      if(this.notMoving){        
+        this.startPlayer(direction);
+      } else {
+        this.direction = direction;
+        this.turnCount = 0;
+      };
+    }
   };
 
   var Tail = function(game,body) {
 
-  this.game = game;
-  this.follows = body;
-  this.size = { x: 12, y: 12 };
-  this.direction = body.direction;
+    this.game = game;
+    this.follows = body;
+    this.size = { x: 12, y: 12 };
+    this.direction = body.direction;
+
+
+    if (this.game.colorPulse > 0) {
+
+  this.game.colorPulse = this.game.colorPulse + .1;
+
+  } else {
+
+  this.game.colorPulse = this.game.colorPulse - .1;
+
+  };
+
+
+
+
+
 
   if (body.direction === "right"){
     this.center = { x: body.center.x - 15 , y: body.center.y };
@@ -392,7 +347,8 @@
 
           for(i=0; i<this.game.bodies.length; i++){
 
-          this.game.bodies[i] = ""
+          this.game.bodies[i] = "";
+          this.game.active = false;
 
           }
 
@@ -440,6 +396,8 @@
         b1.center.y - b1.size.y / 2 >= b2.center.y + b2.size.y / 2
     );
   };
+
+
 
   var reportCollisions = function(bodies) {
     var bodyPairs = [];
